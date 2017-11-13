@@ -14,14 +14,24 @@ public class Human implements Strategy {
         return chooseOne(board.getCurrentPossibleSquares(), board);
     }
 
+    public static boolean isEmpty(Board board, int row, int col) {
+        return board.getSquareOwners().containsKey(new Square(row, col));
+    }
+
     public static int countFlips(Board board, Player current, Square move) {
         int flips = 0;
 
         Iterator it = board.getSquareOwners().entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry pair = (Map.Entry)it.next();
-            if (!move.equals(pair.getKey()) && !pair.getValue().equals(current)) {
-                // System.out.println((Square) pair.getKey().getRow());
+
+            int row = ((Square) pair.getKey()).getRow();
+            int col = ((Square) pair.getKey()).getColumn();
+
+            double slope = (double) (move.getColumn() - col) / (move.getRow() - row);
+
+            if (!move.equals(pair.getKey()) && !pair.getValue().equals(current) && (Double.isInfinite(slope) || slope == 0 || Math.abs(slope) == 1)) {
+                System.out.println(pair.getKey() + ", " + pair.getValue());
             }
         }
 
