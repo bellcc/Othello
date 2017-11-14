@@ -21,8 +21,6 @@ public class Human implements Strategy {
     public static int countFlips(Board board, Player current, Square move) {
         int flips = 0;
 
-        System.out.println(board.toString());
-
         Iterator it = board.getSquareOwners().entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry pair = (Map.Entry)it.next();
@@ -38,8 +36,6 @@ public class Human implements Strategy {
             }
 
             if (!move.equals(pair.getKey()) && !pair.getValue().equals(current) && (Double.isInfinite(slope) || slope == 0 || Math.abs(slope) == 1)) {
-                System.out.println(pair.getKey() + ", " + pair.getValue());
-
                 int dirR = 0, dirC = 0;
 
                 if (col > move.getColumn()) {
@@ -72,25 +68,32 @@ public class Human implements Strategy {
         return flips;
     }
 
+    public static int corners(Board board, Square move) {
+        if ((move.getRow() == 0 || move.getRow() == 7) &&
+                (move.getColumn() == 0 || move.getColumn() == 7)) {
+            return 1000;
+        }
+
+        return 0;
+    }
+
     public static int heuristic(Board board, Player current, Square move) {
-        return countFlips(board, current, move);
+        return countFlips(board, current, move) + corners(board, move);
     }
 
     public static <T> T chooseOne(Set<T> itemSet, Board board) {
         List<T> itemList = new ArrayList<>(itemSet);
         int picked = 0;
 
-        int value = heuristic(board, board.getCurrentPlayer(), (Square) itemList.get(0));
+        int max = Integer.MIN_VALUE;
+        for (int i = 0; i < itemList.size(); i++) {
+            int value = heuristic(board, board.getCurrentPlayer(), (Square) itemList.get(i));
 
-        Scanner in = new Scanner(System.in);
-
-        int i = 0;
-        for (T item : itemList) {
-            System.out.println(i + " " + item);
-            i++;
+            if (value > max) {
+                max = value;
+                picked = i;
+            }
         }
-
-        picked = in.nextInt();
 
         return itemList.get(picked);
     }
