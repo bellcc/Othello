@@ -15,11 +15,13 @@ public class Human implements Strategy {
     }
 
     public static boolean isEmpty(Board board, int row, int col) {
-        return board.getSquareOwners().containsKey(new Square(row, col));
+        return !board.getSquareOwners().containsKey(new Square(row, col));
     }
 
     public static int countFlips(Board board, Player current, Square move) {
         int flips = 0;
+
+        System.out.println(board.toString());
 
         Iterator it = board.getSquareOwners().entrySet().iterator();
         while (it.hasNext()) {
@@ -30,8 +32,40 @@ public class Human implements Strategy {
 
             double slope = (double) (move.getColumn() - col) / (move.getRow() - row);
 
+            if (move.getRow() - row == 0) {
+                // Handles zero column
+                slope = 0;
+            }
+
             if (!move.equals(pair.getKey()) && !pair.getValue().equals(current) && (Double.isInfinite(slope) || slope == 0 || Math.abs(slope) == 1)) {
                 System.out.println(pair.getKey() + ", " + pair.getValue());
+
+                int dirR = 0, dirC = 0;
+
+                if (col > move.getColumn()) {
+                    dirC = 1;
+                } else if (col < move.getColumn()) {
+                    dirC = -1;
+                }
+
+                if (row > move.getRow()) {
+                    dirR = 1;
+                } else if (row < move.getRow()) {
+                    dirR = -1;
+                }
+
+                int r = row + dirR, c = col + dirC, count = 0;
+                while (!isEmpty(board, r, c)) {
+                    count ++;
+
+                    if (!board.getSquareOwners().get(new Square(r, c)).opponent().equals(current)) {
+                        flips += count;
+                        break;
+                    }
+
+                    r += dirR;
+                    c += dirC;
+                }
             }
         }
 
