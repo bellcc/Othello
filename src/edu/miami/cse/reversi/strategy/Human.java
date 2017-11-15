@@ -9,6 +9,42 @@ import edu.miami.cse.reversi.Strategy;
 
 public class Human implements Strategy {
 
+    class Node {
+        private Board board;
+        private Square move;
+        private int value;
+
+        private ArrayList<Node> children;
+
+        public Node(Board board, Square move, int value) {
+            this.board = board;
+            this.move = move;
+            this.value = value;
+
+            this.children = new ArrayList<>();
+        }
+
+        public Board getBoard() {
+            return this.board;
+        }
+
+        public Square getMove() {
+            return this.move;
+        }
+
+        public int getValue() {
+            return this.value;
+        }
+
+        public void addChild(Node node) {
+            children.add(node);
+        }
+
+        public ArrayList<Node> getChildren() {
+            return this.children;
+        }
+    }
+
     @Override
     public Square chooseSquare(Board board) {
         return chooseOne(board.getCurrentPossibleSquares(), board);
