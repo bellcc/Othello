@@ -9,7 +9,7 @@ import edu.miami.cse.reversi.Strategy;
 
 public class Human implements Strategy {
 
-    class Node {
+    static class Node {
         private Board board;
         private Square move;
         private int value;
@@ -51,8 +51,8 @@ public class Human implements Strategy {
     }
 
     public static int countFlips(Board simulated, Board current) {
-        Player type = current.getCurrentPlayer();
-        return simulated.getPlayerSquareCounts().get(type) - current.getPlayerSquareCounts().get(type);
+        Player player = current.getCurrentPlayer();
+        return simulated.getPlayerSquareCounts().get(player) - current.getPlayerSquareCounts().get(player);
     }
 
     public static int corners(Square move) {
@@ -68,14 +68,46 @@ public class Human implements Strategy {
         return countFlips(board, simulated) + corners(move);
     }
 
+    public static ArrayList<Square> getMoves(Board board) {
+        return new ArrayList<>(board.getCurrentPossibleSquares());
+    }
+
+    public static <T> Node getDecisionTree(Board board) {
+        return createTree(new Node(board, null, 0), 0, 3);
+    }
+
+    public static <T> Node createTree(Node parent, int depth, int maxDepth) {
+        if (depth == maxDepth) {
+            return parent;
+        }
+
+        ArrayList<Square> moves = getMoves(parent.getBoard());
+        for (Square move : moves) {
+            Board board = parent.getBoard().play(move);
+            Node child = new Node(board, move, heuristic(parent.getBoard(), board, move));
+
+            parent.addChild(createTree(child, depth + 1, maxDepth));
+        }
+
+        return parent;
+    }
+
     public static <T> T chooseOne(Set<T> itemSet, Board board) {
-        List<T> itemList = new ArrayList<>(itemSet);
+        Node tree = getDecisionTree(board);
+
+        return new ArrayList<>(itemSet).get(0);
+
+        /*
         int picked = 0;
 
         int max = Integer.MIN_VALUE;
         for (int i = 0; i < itemList.size(); i++) {
-            Board simulated = board.play((Square) itemList.get(i));
-            int value = heuristic(board, simulated, (Square) itemList.get(i));
+            Square move = (Square) itemList.get(i);
+            Board simulated = board.play(move);
+
+            int value = heuristic(board, simulated, move);
+
+            // Node node = new Node(board, move, value);
 
             if (value > max) {
                 max = value;
@@ -84,5 +116,6 @@ public class Human implements Strategy {
         }
 
         return itemList.get(picked);
+        */
     }
 }
