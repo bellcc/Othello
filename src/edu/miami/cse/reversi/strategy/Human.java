@@ -9,8 +9,6 @@ import edu.miami.cse.reversi.Strategy;
 
 public class Human implements Strategy {
 
-    static Player player;
-
     static class Node {
         private Board board;
         private Square move;
@@ -107,7 +105,7 @@ public class Human implements Strategy {
             return node.getValue();
         }
 
-        if (node.getBoard().getCurrentPlayer().equals(player)) {
+        if (maxPlayer) { // node.getBoard().getCurrentPlayer().equals(player)) {
             int value = Integer.MIN_VALUE;
 
             for (Node child : node.getChildren()) {
@@ -137,24 +135,10 @@ public class Human implements Strategy {
     }
 
     public static <T> T chooseOne(Set<T> itemSet, Board board) {
-        long start = System.currentTimeMillis();
-
-
-        player = board.getCurrentPlayer();
-
         List<T> moves = new ArrayList<>(itemSet);
 
-        //*
         Node tree = getDecisionTree(board);
-
-
-
-        int opt = alphabeta(tree, 2, 0, 0, true);
-
-        long end = System.currentTimeMillis();
-        long time = end - start;
-        System.out.println(end - start);
-
+        int opt = alphabeta(tree, 3, 0, 0, true);
 
         for (T move : moves) {
             for (Node child : tree.getChildren()) {
@@ -165,27 +149,5 @@ public class Human implements Strategy {
         }
 
         return null;
-        //*/
-
-        /*
-        int picked = 0;
-
-        int max = Integer.MIN_VALUE;
-        for (int i = 0; i < moves.size(); i++) {
-            Square move = (Square) moves.get(i);
-            Board simulated = board.play(move);
-
-            int value = heuristic(board, simulated, move);
-
-            // Node node = new Node(board, move, value);
-
-            if (value > max) {
-                max = value;
-                picked = i;
-            }
-        }
-
-        return moves.get(picked);
-        */
     }
 }
