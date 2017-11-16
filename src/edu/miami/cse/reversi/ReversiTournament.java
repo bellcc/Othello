@@ -26,6 +26,8 @@ public class ReversiTournament {
 
 		strategies.add(new RandomStrategy());
 		strategies.add(new Human());
+		// strategies.add(new Human());
+
 
 		// The number of wins of each strategy 
 		Map<Strategy, Integer> wins = Maps.newHashMap();

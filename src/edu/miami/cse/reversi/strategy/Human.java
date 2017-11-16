@@ -9,6 +9,8 @@ import edu.miami.cse.reversi.Strategy;
 
 public class Human implements Strategy {
 
+    static Player player;
+
     static class Node {
         private Board board;
         private Square move;
@@ -92,17 +94,85 @@ public class Human implements Strategy {
         return parent;
     }
 
+    public static Player getOpponent(Player player) {
+        if (player.equals(Player.BLACK)) {
+            return Player.WHITE;
+        }
+
+        return Player.BLACK;
+    }
+
+    public static int alphabeta(Node node, int depth, int alpha, int beta, boolean maxPlayer) {
+        if (depth == 0 || node.getChildren().size() == 0) {
+            return node.getValue();
+        }
+
+        if (node.getBoard().getCurrentPlayer().equals(player)) {
+            int value = Integer.MIN_VALUE;
+
+            for (Node child : node.getChildren()) {
+                value = Math.max(value, alphabeta(child, depth - 1, alpha, beta, false));
+                alpha = Math.max(alpha, value);
+
+                if (beta <= alpha) {
+                    break;
+                }
+            }
+
+            return value;
+        } else {
+            int value = Integer.MAX_VALUE;
+
+            for (Node child : node.getChildren()) {
+                value = Math.min(value, alphabeta(child, depth - 1, alpha, beta, true));
+                beta = Math.min(beta, value);
+
+                if (beta <= alpha) {
+                    break;
+                }
+            }
+
+            return value;
+        }
+    }
+
     public static <T> T chooseOne(Set<T> itemSet, Board board) {
+        long start = System.currentTimeMillis();
+
+
+        player = board.getCurrentPlayer();
+
+        List<T> moves = new ArrayList<>(itemSet);
+
+        //*
         Node tree = getDecisionTree(board);
 
-        return new ArrayList<>(itemSet).get(0);
+
+
+        int opt = alphabeta(tree, 2, 0, 0, true);
+
+        long end = System.currentTimeMillis();
+        long time = end - start;
+        System.out.println(end - start);
+
+
+        for (T move : moves) {
+            for (Node child : tree.getChildren()) {
+                if (move.equals(child.getMove()) && child.getValue() == opt) {
+                    return move;
+                }
+            }
+        }
+
+        return null;
+        //*/
 
         /*
         int picked = 0;
 
         int max = Integer.MIN_VALUE;
-        for (int i = 0; i < itemList.size(); i++) {
-            Square move = (Square) itemList.get(i);
+        for (int i = 0; i < moves.size(); i++) {
+            Square move = (Square) moves.get(i);
             Board simulated = board.play(move);
 
             int value = heuristic(board, simulated, move);
@@ -115,7 +185,7 @@ public class Human implements Strategy {
             }
         }
 
-        return itemList.get(picked);
+        return moves.get(picked);
         */
     }
 }
