@@ -16,12 +16,18 @@ public class Human implements Strategy {
 
         private ArrayList<Node> children;
 
+        private Square optimal;
+
         public Node(Board board, Square move, int value) {
             this.board = board;
             this.move = move;
             this.value = value;
 
             this.children = new ArrayList<>();
+
+            // Set default value
+            // optimal = new Node(this.board, this.move, this.value);
+            this.optimal = new Square(-1, -1);
         }
 
         public Board getBoard() {
@@ -42,6 +48,14 @@ public class Human implements Strategy {
 
         public ArrayList<Node> getChildren() {
             return this.children;
+        }
+
+        public void setOptimal(Square square) {
+            this.optimal = square;
+        }
+
+        public Square getOptimal() {
+            return this.optimal;
         }
     }
 
@@ -105,11 +119,19 @@ public class Human implements Strategy {
             return node.getValue();
         }
 
-        if (maxPlayer) { // node.getBoard().getCurrentPlayer().equals(player)) {
+        if (maxPlayer) {
             int value = Integer.MIN_VALUE;
 
             for (Node child : node.getChildren()) {
-                value = Math.max(value, alphabeta(child, depth - 1, alpha, beta, false));
+                //*
+                int tmp = alphabeta(child, depth - 1, alpha, beta, false);
+
+                if (tmp > value) {
+                    child.setOptimal(child.getMove());
+                    value = tmp;
+                }
+                //*/
+                // value = Math.max(value, alphabeta(child, depth - 1, alpha, beta, false));
                 alpha = Math.max(alpha, value);
 
                 if (beta <= alpha) {
@@ -122,6 +144,15 @@ public class Human implements Strategy {
             int value = Integer.MAX_VALUE;
 
             for (Node child : node.getChildren()) {
+                //*
+                int tmp = alphabeta(child, depth - 1, alpha, beta, true);
+
+                if (tmp < value) {
+                    child.setOptimal(child.getMove());
+                    value = tmp;
+                }
+                //*/
+
                 value = Math.min(value, alphabeta(child, depth - 1, alpha, beta, true));
                 beta = Math.min(beta, value);
 
@@ -134,17 +165,27 @@ public class Human implements Strategy {
         }
     }
 
+    public static Square getOptimal(Node tree) {
+        for (Node child : tree.getChildren()) {
+            if (!child.getOptimal().equals(new Square(-1, -1))) {
+                return child.getOptimal();
+            }
+        }
+
+        return null;
+    }
+
     public static <T> T chooseOne(Set<T> itemSet, Board board) {
         List<T> moves = new ArrayList<>(itemSet);
 
         Node tree = getDecisionTree(board);
-        int opt = alphabeta(tree, 3, 0, 0, true);
+
+        int value = alphabeta(tree, 3, 0, 0, true);
+        Square optimal = getOptimal(tree);
 
         for (T move : moves) {
-            for (Node child : tree.getChildren()) {
-                if (move.equals(child.getMove()) && child.getValue() == opt) {
-                    return move;
-                }
+            if (move.equals(optimal)) {
+                return move;
             }
         }
 
