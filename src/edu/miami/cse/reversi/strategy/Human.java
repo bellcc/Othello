@@ -83,8 +83,30 @@ public class Human implements Strategy {
         return simulated.getPlayerSquareCounts().get(player) - (64 - simulated.getPlayerSquareCounts().get(player));
     }
 
+    public static int countRealTotal(Board simulated, Board current) {
+        Player player = current.getCurrentPlayer();
+        int empty = 64 - simulated.getPlayerSquareCounts().get(Player.WHITE) - simulated.getPlayerSquareCounts().get(Player.BLACK);
+        return simulated.getPlayerSquareCounts().get(player) - (64 - simulated.getPlayerSquareCounts().get(player) - empty);
+    }
+
+    public static int isBad(Square move){
+        boolean notcorner = corners(move) == 0;
+        if ((move.getRow() == 0 || move.getRow() == 7 || move.getRow() == 1 ||move.getRow() == 6)  &&
+                (move.getColumn() == 0 || move.getColumn() == 7 || move.getColumn() == 1 || move.getColumn() == 6) &&
+                notcorner) {
+            return -1000;
+        }
+        return 0;
+    }
+
+    public static int isEdge(Square move){
+        if(move.getColumn() == 0 || move.getColumn() == 7 || move.getRow() == 0 || move.getRow() == 7){
+            return 10;
+        }
+        return 0;
+    }
     public static int heuristic(Board board, Board simulated, Square move) {
-        return countFlips(board, simulated) + corners(move) + 2 * countTotal(board, simulated);
+        return countFlips(board, simulated) + corners(move) + 15 * countRealTotal(board, simulated) + isEdge(move);// + isBad(move);
     }
 
     public static ArrayList<Square> getMoves(Board board) {
