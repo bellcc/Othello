@@ -78,8 +78,13 @@ public class Human implements Strategy {
         return 0;
     }
 
+    public static int countTotal(Board simulated, Board current) {
+        Player player = current.getCurrentPlayer();
+        return simulated.getPlayerSquareCounts().get(player) - (64 - simulated.getPlayerSquareCounts().get(player));
+    }
+
     public static int heuristic(Board board, Board simulated, Square move) {
-        return countFlips(board, simulated) + corners(move);
+        return countFlips(board, simulated) + corners(move) + 2 * countTotal(board, simulated);
     }
 
     public static ArrayList<Square> getMoves(Board board) {
@@ -180,7 +185,7 @@ public class Human implements Strategy {
 
         Node tree = getDecisionTree(board);
 
-        int value = alphabeta(tree, 3, 0, 0, true);
+        int value = alphabeta(tree, 5, 0, 0, true);
         Square optimal = getOptimal(tree);
 
         for (T move : moves) {

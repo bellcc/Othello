@@ -17,8 +17,8 @@ public class ReversiTournament {
 	 */
 	public static void main(String[] args) throws Exception {
 
-		int nGames = 1; 
-		long timeout = 10;
+		int nGames = 200;
+		long timeout = 1000000;
 		TimeUnit timeoutUnit = TimeUnit.SECONDS;
 
 		// List of the strategies in the tournament 
