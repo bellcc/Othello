@@ -7,7 +7,7 @@ import edu.miami.cse.reversi.Board;
 import edu.miami.cse.reversi.Square;
 import edu.miami.cse.reversi.Strategy;
 
-public class Human implements Strategy {
+public class GameProject5 implements Strategy {
 
     static class Node {
         private Board board;
@@ -18,6 +18,9 @@ public class Human implements Strategy {
 
         private Square optimal;
 
+        /*
+            Internal class used to represent the decision tree structure.
+         */
         public Node(Board board, Square move, int value) {
             this.board = board;
             this.move = move;
@@ -26,7 +29,6 @@ public class Human implements Strategy {
             this.children = new ArrayList<>();
 
             // Set default value
-            // optimal = new Node(this.board, this.move, this.value);
             this.optimal = new Square(-1, -1);
         }
 
@@ -64,11 +66,17 @@ public class Human implements Strategy {
         return chooseOne(board.getCurrentPossibleSquares(), board);
     }
 
+    /*
+        Counts the number of pieces that would be flipped between one game state to another.
+     */
     public static int countFlips(Board simulated, Board current) {
         Player player = current.getCurrentPlayer();
         return simulated.getPlayerSquareCounts().get(player) - current.getPlayerSquareCounts().get(player);
     }
 
+    /*
+        Corners are a strategic move that should always be made if given the opportunity.
+     */
     public static int corners(Square move) {
         if ((move.getRow() == 0 || move.getRow() == 7) &&
                 (move.getColumn() == 0 || move.getColumn() == 7)) {
@@ -99,24 +107,40 @@ public class Human implements Strategy {
         return 0;
     }
 
+    /*
+        Determines if a given square is along the outermost border of the board.
+     */
     public static int isEdge(Square move){
         if(move.getColumn() == 0 || move.getColumn() == 7 || move.getRow() == 0 || move.getRow() == 7){
             return 10;
         }
         return 0;
     }
+
+    /*
+        The heuristic used to evaluate a game state.
+     */
     public static int heuristic(Board board, Board simulated, Square move) {
         return countFlips(board, simulated) + corners(move) + 15 * countRealTotal(board, simulated) + isEdge(move);// + isBad(move);
     }
 
+    /*
+        Retrieves all of the possible moves for a given game state.
+     */
     public static ArrayList<Square> getMoves(Board board) {
         return new ArrayList<>(board.getCurrentPossibleSquares());
     }
 
+    /*
+        Outer function that creates a decision tree that has a depth of three.
+     */
     public static <T> Node getDecisionTree(Board board) {
         return createTree(new Node(board, null, 0), 0, 3);
     }
 
+    /*
+        Creates the decision tree for with a given starting state.
+     */
     public static <T> Node createTree(Node parent, int depth, int maxDepth) {
         if (depth == maxDepth) {
             return parent;
@@ -133,6 +157,9 @@ public class Human implements Strategy {
         return parent;
     }
 
+    /*
+        Returns the other player given a player object.
+     */
     public static Player getOpponent(Player player) {
         if (player.equals(Player.BLACK)) {
             return Player.WHITE;
@@ -141,6 +168,9 @@ public class Human implements Strategy {
         return Player.BLACK;
     }
 
+    /*
+         Performs alpha beta pruning to determine the most optimal game state with our heuristic function.
+     */
     public static int alphabeta(Node node, int depth, int alpha, int beta, boolean maxPlayer) {
         if (depth == 0 || node.getChildren().size() == 0) {
             return node.getValue();
@@ -150,15 +180,13 @@ public class Human implements Strategy {
             int value = Integer.MIN_VALUE;
 
             for (Node child : node.getChildren()) {
-                //*
                 int tmp = alphabeta(child, depth - 1, alpha, beta, false);
 
                 if (tmp > value) {
                     child.setOptimal(child.getMove());
                     value = tmp;
                 }
-                //*/
-                // value = Math.max(value, alphabeta(child, depth - 1, alpha, beta, false));
+
                 alpha = Math.max(alpha, value);
 
                 if (beta <= alpha) {
@@ -171,16 +199,13 @@ public class Human implements Strategy {
             int value = Integer.MAX_VALUE;
 
             for (Node child : node.getChildren()) {
-                //*
                 int tmp = alphabeta(child, depth - 1, alpha, beta, true);
 
                 if (tmp < value) {
                     child.setOptimal(child.getMove());
                     value = tmp;
                 }
-                //*/
 
-                value = Math.min(value, alphabeta(child, depth - 1, alpha, beta, true));
                 beta = Math.min(beta, value);
 
                 if (beta <= alpha) {
@@ -192,6 +217,9 @@ public class Human implements Strategy {
         }
     }
 
+    /*
+        Determines what the optimal decision based on a tree that has been processed by alpha beta pruning.
+     */
     public static Square getOptimal(Node tree) {
         for (Node child : tree.getChildren()) {
             if (!child.getOptimal().equals(new Square(-1, -1))) {
@@ -202,12 +230,15 @@ public class Human implements Strategy {
         return null;
     }
 
+    /*
+        Chooses which possible move should be made with alpha beta pruning.
+     */
     public static <T> T chooseOne(Set<T> itemSet, Board board) {
         List<T> moves = new ArrayList<>(itemSet);
 
         Node tree = getDecisionTree(board);
 
-        int value = alphabeta(tree, 5, 0, 0, true);
+        int value = alphabeta(tree, 3, 0, 0, true);
         Square optimal = getOptimal(tree);
 
         for (T move : moves) {

@@ -25,8 +25,8 @@ public class ReversiTournament {
 		List<Strategy> strategies = Lists.newArrayList();
 
 		strategies.add(new RandomStrategy());
-		strategies.add(new Human());
-		// strategies.add(new Human());
+		strategies.add(new GameProject5());
+		// strategies.add(new GameProject5());
 
 
 		// The number of wins of each strategy 
