@@ -121,7 +121,12 @@ public class GameProject5 implements Strategy {
         The heuristic used to evaluate a game state.
      */
     public static int heuristic(Board board, Board simulated, Square move) {
-        return countFlips(board, simulated) + corners(move) + 15 * countRealTotal(board, simulated) + isEdge(move);// + isBad(move);
+        int val = countFlips(board, simulated) + corners(move) + 15 * countRealTotal(board, simulated) + isEdge(move);
+        if(val < 0) {
+            val = 0;
+            val = countFlips(board, simulated) + corners(move);
+        }
+        return val;// + isBad(move);
     }
 
     /*
@@ -187,6 +192,7 @@ public class GameProject5 implements Strategy {
                     value = tmp;
                 }
 
+                value = Math.min(value, alphabeta(child, depth - 1, alpha, beta, true));
                 alpha = Math.max(alpha, value);
 
                 if (beta <= alpha) {
@@ -238,7 +244,7 @@ public class GameProject5 implements Strategy {
 
         Node tree = getDecisionTree(board);
 
-        int value = alphabeta(tree, 3, 0, 0, true);
+        int value = alphabeta(tree, 7, 0, 0, true);
         Square optimal = getOptimal(tree);
 
         for (T move : moves) {
